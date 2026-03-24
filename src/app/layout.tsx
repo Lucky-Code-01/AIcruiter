@@ -15,8 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AIcruiter",
-  description: "AIcruiter Start live interview in a minutes",
+  title: "AIcruiter Coach – Practice Mock Interviews with Real-Time Feedback",
+  description: "Practice real interview scenarios using AI-powered voice interaction. Get instant feedback, improve communication skills, and boost your confidence for technical, HR, and behavioral interviews.",
+  icons: {
+    icon: '/favicon.png'
+  }
 };
 
 export default function RootLayout({

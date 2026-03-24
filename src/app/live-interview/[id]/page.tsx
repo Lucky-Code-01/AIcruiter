@@ -31,7 +31,7 @@ export default function LiveInterview() {
   const recognitionRef = useRef<any>(null);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const Timer = 60;
 
   // --- Speech Recognition Setup ---
@@ -54,18 +54,18 @@ export default function LiveInterview() {
       };
 
       recognitionRef.current.onerror = (event: any) => {
-      console.error("Speech error:", event.error);
-  
-    if (event.error === 'audio-capture') {
-      toast.error("Microphone nahi mil raha. Check karein ki mic plugged in hai ya nahi.");
-    } else if (event.error === 'not-allowed') {
-      toast.error("Microphone permission blocked hai. Browser settings se allow karein.");
-    } else {
-      toast.error("Speech Recognition mein error: " + event.error);
-    }
-    
-    setIsListening(false);
-  };
+        console.error("Speech error:", event.error);
+
+        if (event.error === 'audio-capture') {
+          toast.error("Microphone nahi mil raha. Check karein ki mic plugged in hai ya nahi.");
+        } else if (event.error === 'not-allowed') {
+          toast.error("Microphone permission blocked hai. Browser settings se allow karein.");
+        } else {
+          toast.error("Speech Recognition mein error: " + event.error);
+        }
+
+        setIsListening(false);
+      };
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
@@ -197,10 +197,20 @@ export default function LiveInterview() {
 
     speech.onstart = () => {
       setIsSpeaking(true);
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0; // start from beginning
+        videoRef.current.play().catch(() => {
+          console.log("Video autoplay blocked");
+        });
+      }
       recognitionRef.current?.stop(); // AI bolte waqt mic band
     };
 
     speech.onend = () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0; // reset (optional)
+      }
       setIsSpeaking(false);
       // AI bolne ke baad mic auto-start nahi hoga (aapke logic ke mutabik user click karega)
     };
@@ -235,6 +245,7 @@ export default function LiveInterview() {
           <div className=" md:w-97.5 flex flex-col p-4 md:p-6 space-y-4">
             <div className="w-full h-48 md:h-56">
               <video
+                ref={videoRef}
                 className="w-full h-full rounded-xl mb-4 object-cover border shadow"
                 poster="/Video/femalethumbnail.png"
               >
@@ -291,9 +302,8 @@ export default function LiveInterview() {
             />
 
             <div
-              className={`w-full transition-all duration-300 ease-in-out ${
-                result[currentIndex]?.feeback && "p-6 bg-emerald-100 rounded-2xl shadow border"
-              }`}
+              className={`w-full transition-all duration-300 ease-in-out ${result[currentIndex]?.feeback && "p-6 bg-emerald-100 rounded-2xl shadow border"
+                }`}
             >
               {result[currentIndex]?.feeback && (
                 <div className="text-sm text-green-600 font-medium mb-4">
@@ -306,9 +316,8 @@ export default function LiveInterview() {
                   <button
                     onClick={toggleListening}
                     type="button"
-                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
-                      isListening ? "bg-red-500 animate-bounce" : "bg-black"
-                    }`}
+                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${isListening ? "bg-red-500 animate-bounce" : "bg-black"
+                      }`}
                   >
                     {isListening ? (
                       <MicOff className="text-white" size={20} />
