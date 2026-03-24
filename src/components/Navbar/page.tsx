@@ -41,7 +41,7 @@ function Navbar() {
 
         {/* Coins */}
         <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
-          💰 <span>0</span>
+          💰 <span>100</span>
         </div>
 
         {/* Profile Icon */}
