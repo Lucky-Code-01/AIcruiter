@@ -40,7 +40,7 @@ function Navbar() {
       <div className="flex items-center gap-3 sm:gap-6">
 
         {/* Coins */}
-        <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
+        <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm" onClick={()=> router.push('/pricing')}>
           💰 <span>100</span>
         </div>
 
