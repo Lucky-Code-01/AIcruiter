@@ -6,7 +6,7 @@ export interface User{
     email: string,
     password: string,
     credit: number
-}
+};
 
 const userSchema: Schema<User> = new Schema({
     username: {
@@ -35,4 +35,3 @@ const userSchema: Schema<User> = new Schema({
 const UserModel = (mongoose.models.User as mongoose.Model<User>) || mongoose.model<User>('User',userSchema);
 
 export default UserModel;
- 
