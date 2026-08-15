@@ -3,7 +3,7 @@ import dbConnection from "@/utils/Connection";
 import crypto from 'crypto';
 import UserModel from "@/models/userModel";
 
-export async function POST(req: Request) { 
+export async function POST(req: Request) {
     try {
 
         const rawBody = await req.text();
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
             .update(rawBody)
             .digest("hex");
 
-        
+
         console.log("your backend expected signature :- ", expectedSignature);
 
         if (expectedSignature !== signature) {
@@ -33,23 +33,46 @@ export async function POST(req: Request) {
 
         //event parse
         const event = JSON.parse(rawBody);
+        
         console.log("your event :- ", event);
-        if (event.event === "payment captured") {
-            const paymentEntity = event.payload.payment.entity;
-            console.log("💰 Payment Captured for Order ID:", paymentEntity.order_id);
-            const userId = paymentEntity.notes?.userId;
-            const creditsToAdd = Number(paymentEntity.notes?.credit);
 
-            if (userId && creditsToAdd) {
-                await dbConnection();
+        await dbConnection();
 
-                // Database mein User ke credits update karo
-                await UserModel.findByIdAndUpdate(userId, {
-                    $inc: { credits: creditsToAdd },
-                });
+        switch (event.event) {
 
-                console.log(`✅ WEBHOOK SUCCESS: Added ${creditsToAdd} credits to User ${userId}`);
+            // EVENT 1 & 2: Payment Successful (Credits Add Karo)
+            case "payment.captured":
+            case "order.paid": {
+                const payment = event.payload.payment?.entity;
+                const userId = payment?.notes?.userId;
+                const creditsToAdd = Number(payment?.notes?.credit);
+
+                console.log(`💰 Success Event: ${event.event} for Order ID: ${payment?.order_id}`);
+
+                if (userId && creditsToAdd) {
+                    await UserModel.findByIdAndUpdate(
+                        userId,
+                        { $inc: { credit: creditsToAdd } }, 
+                        { new: true }
+                    );
+                    console.log(`✅ ${creditsToAdd} Credits added successfully to User ${userId}!`);
+                }
+                break;
             }
+
+            // EVENT 3: Payment Failed / Error
+            case "payment.failed": {
+                const failedPayment = event.payload.payment?.entity;
+                const userId = failedPayment?.notes?.userId;
+                const reason = failedPayment?.error_description || "Unknown Reason";
+
+                console.error(` Payment Failed for User ${userId}. Reason: ${reason}`);
+
+                break;
+            }
+
+            default:
+                console.log(`Unhandled Event: ${event.event}`);
         }
 
         return NextResponse.json({ status: "ok" }, { status: 200 });
