@@ -23,6 +23,9 @@ export async function POST(req: Request) {
             .update(rawBody)
             .digest("hex");
 
+        
+        console.log("your backend expected signature :- ", expectedSignature);
+
         if (expectedSignature !== signature) {
             console.error("Invalid Webhook Signature!");
             return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
@@ -54,5 +57,6 @@ export async function POST(req: Request) {
 
     catch (error) {
         console.log("Your error :- ", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 };
