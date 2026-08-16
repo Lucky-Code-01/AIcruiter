@@ -193,7 +193,7 @@ function Page() {
       <div className="w-full flex justify-between items-center py-4 px-3">
         <div className="flex items-center gap-3">
           <div
-            onClick={() => router.back()}
+            onClick={() => window.location.href = "/"}
             className="w-10 h-10 flex items-center justify-center rounded-full border shadow cursor-pointer"
           >
             <ArrowLeftIcon />

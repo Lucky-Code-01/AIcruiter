@@ -10,6 +10,7 @@ function Navbar() {
   const user = session?.user;
 
   const [open, setOpen] = useState(false);
+  const [credit, setCredit] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -27,6 +28,18 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(()=> {
+    async function getCredits(){
+      const response = await fetch("/api/user-credit");
+      const data = await response.json();
+      if(data.success){
+        setCredit(data.credit);
+      }
+    };
+
+    getCredits();
+  }, []);
+
   return (
     <nav className="flex items-center justify-between px-4 sm:px-8 py-3 bg-white shadow-sm rounded-full mx-2 sm:mx-10 relative">
 
@@ -40,9 +53,11 @@ function Navbar() {
       <div className="flex items-center gap-3 sm:gap-6">
 
         {/* Coins */}
-        <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm" onClick={()=> router.push('/pricing')}>
-          💰 <span>100</span>
+        {
+          user && <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm cursor-pointer" onClick={()=> router.push('/pricing')}>
+          💰 <span>{credit}</span>
         </div>
+        }
 
         {/* Profile Icon */}
         <div className="relative" ref={dropdownRef}>
